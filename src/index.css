@@ -14,10 +14,10 @@
 
 @layer base {
   :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    color-scheme: dark;
-    color: var(--color-surface);
-    background-color: var(--color-canvas);
+    font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: light;
+    color: var(--color-ink);
+    background-color: var(--color-surface);
   }
 
   * {
@@ -27,6 +27,15 @@
   body {
     margin: 0;
     min-width: 320px;
-    background-color: var(--color-canvas);
+    font-size: 1.05rem;
+    background-color: var(--color-surface);
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
   }
 }
