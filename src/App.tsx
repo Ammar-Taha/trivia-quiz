@@ -4,7 +4,7 @@ import Quiz from "./views/quiz/Quiz";
 import Results from "./views/results/Results";
 
 function App() {
-  const [view] = useState<"start" | "quiz" | "results">("start");
+  const [view] = useState<"start" | "quiz" | "results">("quiz");
 
   // Simple State-based routing
   switch (view) {
