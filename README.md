@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# Trivia Quiz App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript trivia quiz application with a blue-themed UI and multi-screen flow (`Start`, `Quiz`, `Results`).
 
-Currently, two official plugins are available:
+## Scoring Model (Proposed)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This project uses a **richer scoring system** than simple correct-answer counting.
+Each question can reward:
 
-## React Compiler
+- correctness
+- speed
+- streak consistency
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Formula
 
-## Expanding the ESLint configuration
+For each question:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+questionScore = correctnessPoints + speedBonus + streakBonus
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+For the whole quiz:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+finalScore = sum(questionScore for all questions)
 ```
+
+---
+
+## Scoring Components
+
+### 1) Correctness Points (Base)
+
+- Correct answer: `+100`
+- Wrong answer: `0` (optional variant: small penalty such as `-20`)
+
+### 2) Speed Bonus
+
+Speed bonus only applies on correct answers.
+
+```text
+speedRatio = timeLeft / timeLimit
+speedBonus = round(40 * speedRatio)
+```
+
+- If user answers very fast, they can get up to `+40`.
+- If user answers at the last moment, bonus approaches `0`.
+
+### 3) Streak Bonus
+
+Streak bonus also applies only on correct answers.
+
+- streak `1-2`: `+0`
+- streak `3-4`: `+10`
+- streak `5-6`: `+20`
+- streak `7+`: `+30`
+
+---
+
+## Worked Example
+
+Question result:
+
+- Correct answer
+- Time left: `12s` out of `20s`
+- Current streak: `4`
+
+Calculation:
+
+```text
+Base = 100
+Speed ratio = 12 / 20 = 0.6
+Speed bonus = round(40 * 0.6) = 24
+Streak bonus = 10
+Question score = 100 + 24 + 10 = 134
+```
+
+---
+
+## Why This Model
+
+- **Fair:** correctness remains the primary driver.
+- **Engaging:** rewards quick thinking and consistency.
+- **Scalable:** easy to rebalance by changing weights (`100`, `40`, streak tiers).
+- **Readable:** users can understand why their score changed.
+
+---
+
+## Results Metrics Recommendation
+
+For this scoring system, these stats are recommended in the report:
+
+- `Final Score` (important when bonuses are included)
+- `Accuracy`
+- `Correct`
+- `Wrong` (or `Incorrect`)
+- `Avg Time`
+- `Best Streak`
+
+If scoring is simplified later to just `correct count`, `Final Score` may become redundant and can be removed.
