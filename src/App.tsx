@@ -9,7 +9,7 @@ function App() {
   // Simple State-based routing
   switch (view) {
     case "start":
-      return <Start setView={setView} />;
+      return <Start />;
     case "quiz":
       return <Quiz />;
     case "results":

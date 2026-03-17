@@ -11,17 +11,17 @@ export default function MainPane() {
         <div className="mt-1 flex flex-wrap items-center justify-center gap-2.5">
           <CategorySelect
             id="main-category"
-            className="border-2 border-[var(--color-accent)] bg-[var(--color-surface)] px-2.5 py-1.5 text-sm font-medium tracking-wide text-[var(--color-ink)]"
+            className="border-2 border-accent bg-surface px-2.5 py-1.5 text-sm font-medium tracking-wide text-ink"
           />
           <DifficultySelect
             id="main-difficulty"
-            className="border-2 border-[var(--color-accent)] bg-[var(--color-surface)] px-2.5 py-1.5 text-sm font-medium tracking-wide text-[var(--color-ink)]"
+            className="border-2 border-accent bg-surface px-2.5 py-1.5 text-sm font-medium tracking-wide text-ink"
           />
         </div>
 
         <button
           type="button"
-          className="mt-2 border-2 border-[var(--color-accent)] bg-[var(--color-ink)] px-5 py-2.5 text-base font-semibold text-[var(--color-surface)] transition-colors duration-200 hover:bg-[var(--color-danger-hover)]"
+          className="mt-2 border-2 border-accent bg-ink px-5 py-2.5 text-base font-semibold text-surface transition-colors duration-200 hover:bg-danger-hover"
         >
           ▶ Launch Quiz
         </button>
