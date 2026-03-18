@@ -1,10 +1,10 @@
-import { useState } from "react";
 import Start from "./views/start/Start";
 import Quiz from "./views/quiz/Quiz";
 import Results from "./views/results/Results";
+import { useQuizStore } from "./store/quiz-store";
 
 function App() {
-  const [view, setView] = useState<"start" | "quiz" | "results">("start");
+  const view = useQuizStore((s) => s.view);
 
   // Simple State-based routing
   switch (view) {
