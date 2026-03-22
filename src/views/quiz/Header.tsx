@@ -1,8 +1,10 @@
 import { Brain, Flame, LogOut } from "lucide-react";
 import useFormattedQuizSettings from "../../hooks/useFormattedQuizSettings";
+import { useStatsStore } from "../../store/stats-store";
 
 export default function Header() {
   const { category, difficulty } = useFormattedQuizSettings();
+  const streak = useStatsStore((s) => s.stats.streak);
 
   return (
     <header className="flex flex-col gap-3 border-b-2 border-accent bg-surface px-3 py-3 text-ink md:flex-row md:items-center md:justify-between">
@@ -20,7 +22,8 @@ export default function Header() {
         </span>
 
         <span className="inline-flex h-9 items-center gap-1.5 border-2 border-danger-hover bg-surface px-2.5 text-xs font-semibold text-ink">
-          <Flame size={14} />3 streak
+          <Flame size={14} />
+          {streak} streak
         </span>
 
         <button

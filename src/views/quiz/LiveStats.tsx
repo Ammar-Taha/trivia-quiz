@@ -1,11 +1,21 @@
 import useFormattedQuizSettings from "../../hooks/useFormattedQuizSettings";
+import { useQuestionsStore } from "../../store/questions-store";
+import { useStatsStore } from "../../store/stats-store";
+import { useTimerStore } from "../../store/timer-store";
 
 export default function LiveStats() {
   const { category, difficulty } = useFormattedQuizSettings();
-
-  const currentQuestion = 4;
-  const totalQuestions = 10;
-  const progressPercent = (currentQuestion / totalQuestions) * 100;
+  const { score, correct, wrong, streak, currentQuestionNumber } = useStatsStore(
+    (s) => s.stats,
+  );
+  const timeLeftSec = useTimerStore((s) => s.timer.timeLeftSec);
+  const totalQuestions = useQuestionsStore((s) => s.questions.length);
+  const progressDenominator = totalQuestions > 0 ? totalQuestions : 1;
+  const currentQuestion = Math.min(currentQuestionNumber, progressDenominator);
+  const progressPercent = (currentQuestion / progressDenominator) * 100;
+  const minutes = Math.floor(timeLeftSec / 60);
+  const seconds = timeLeftSec % 60;
+  const timeLeftFormatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
   return (
     <aside
@@ -22,23 +32,23 @@ export default function LiveStats() {
       <dl className="space-y-2 text-sm">
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Score</dt>
-          <dd className="font-semibold">50 pts</dd>
+          <dd className="font-semibold">{score} pts</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Correct</dt>
-          <dd className="font-semibold">5</dd>
+          <dd className="font-semibold">{correct}</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Wrong</dt>
-          <dd className="font-semibold">0</dd>
+          <dd className="font-semibold">{wrong}</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Streak</dt>
-          <dd className="font-semibold">3</dd>
+          <dd className="font-semibold">{streak}</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Time Left</dt>
-          <dd className="font-semibold">1:16</dd>
+          <dd className="font-semibold">{timeLeftFormatted}</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Category</dt>
@@ -54,14 +64,14 @@ export default function LiveStats() {
         <div className="mb-1 flex items-center justify-between text-xs font-semibold text-muted">
           <span id="progress-label">Progress</span>
           <output aria-live="polite">
-            {currentQuestion} / {totalQuestions}
+            {currentQuestionNumber} / {totalQuestions}
           </output>
         </div>
         <div
           role="progressbar"
           aria-labelledby="progress-label"
           aria-valuemin={0}
-          aria-valuemax={totalQuestions}
+          aria-valuemax={progressDenominator}
           aria-valuenow={currentQuestion}
           aria-valuetext={`${progressPercent}% complete`}
           className="h-2 w-full border border-accent bg-surface"
