@@ -1,26 +1,44 @@
+import { useState } from "react";
 import Hero from "./Hero";
 import CategorySelect from "./CategorySelect";
 import DifficultySelect from "./DifficultySelect";
 import { useNavigationStore } from "../../store/navigation-store";
+import { useQuestionsStore } from "../../store/questions-store";
 import { useSettingsStore } from "../../store/settings-store";
 
 const QUESTIONS_LIMIT = 10;
+const BASE_URL = "https://the-trivia-api.com/api/questions";
 
 export default function MainPane() {
+  const [isLoading, setIsLoading] = useState(false);
   const setView = useNavigationStore((s) => s.setView);
   const { category, difficulty } = useSettingsStore((s) => s.quizSettings);
+  const setQuestions = useQuestionsStore((s) => s.setQuestions);
+  const setRequestStatus = useQuestionsStore((s) => s.setRequestStatus);
+  const setRequestError = useQuestionsStore((s) => s.setRequestError);
 
   async function handleLaunchQuiz() {
-    setView("quiz");
+    setIsLoading(true);
+    setRequestStatus("loading");
+    setRequestError(null);
+    const QUERY_PARAMS = `limit=${QUESTIONS_LIMIT}&categories=${category}&difficulty=${difficulty}`;
 
-    const URL = `https://the-trivia-api.com/api/questions?limit=${QUESTIONS_LIMIT}&categories=${category}&difficulty=${difficulty}`;
     try {
-      const response = await fetch(URL);
+      const response = await fetch(`${BASE_URL}?${QUERY_PARAMS}`);
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
       const data = await response.json();
-      console.log(data);
+      setQuestions(data);
+      setRequestStatus("success");
+      setView("quiz");
     } catch (error) {
-      window.alert(error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while loading questions.";
+      setRequestStatus("error");
+      setRequestError(message);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -44,8 +62,9 @@ export default function MainPane() {
           type="button"
           className="mt-2 border-2 border-accent bg-ink px-5 py-2.5 text-base font-semibold text-surface transition-colors duration-200 hover:bg-danger-hover"
           onClick={handleLaunchQuiz}
+          disabled={isLoading}
         >
-          ▶ Launch Quiz
+          {isLoading ? "Loading..." : "▶ Launch Quiz"}
         </button>
       </div>
     </section>
