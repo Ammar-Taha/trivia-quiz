@@ -1,10 +1,10 @@
 import Start from "./views/start/Start";
 import Quiz from "./views/quiz/Quiz";
 import Results from "./views/results/Results";
-import { useQuizStore } from "./store/quiz-store";
+import { useNavigationStore } from "./store/navigation-store";
 
 function App() {
-  const view = useQuizStore((s) => s.view);
+  const view = useNavigationStore((s) => s.view);
 
   // Simple State-based routing
   switch (view) {

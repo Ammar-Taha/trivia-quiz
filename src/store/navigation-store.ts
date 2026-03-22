@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-type View = "start" | "quiz" | "results";
+export type View = "start" | "quiz" | "results";
 
-type Store = {
+type NavigationStore = {
   view: View;
   setView: (view: View) => void;
 };
 
-export const useQuizStore = create<Store>((set) => ({
+export const useNavigationStore = create<NavigationStore>((set) => ({
   view: "start",
   setView: (view) => set({ view }),
 }));
