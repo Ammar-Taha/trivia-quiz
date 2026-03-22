@@ -1,4 +1,8 @@
+import useFormattedQuizSettings from "../../hooks/useFormattedQuizSettings";
+
 export default function LiveStats() {
+  const { category, difficulty } = useFormattedQuizSettings();
+
   const currentQuestion = 4;
   const totalQuestions = 10;
   const progressPercent = (currentQuestion / totalQuestions) * 100;
@@ -38,11 +42,11 @@ export default function LiveStats() {
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Category</dt>
-          <dd className="font-semibold">Science</dd>
+          <dd className="font-semibold">{category}</dd>
         </div>
         <div className="flex items-center justify-between border-b border-accent pb-1">
           <dt className="text-muted">Difficulty</dt>
-          <dd className="font-semibold">Medium</dd>
+          <dd className="font-semibold">{difficulty}</dd>
         </div>
       </dl>
 
