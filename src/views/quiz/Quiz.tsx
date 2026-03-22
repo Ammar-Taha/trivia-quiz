@@ -1,42 +1,12 @@
-import { useEffect } from "react";
+import useQuizTimer from "../../hooks/useQuizTimer";
 import { useStatsStore } from "../../store/stats-store";
-import { useTimerStore } from "../../store/timer-store";
-import { useShallow } from "zustand/react/shallow";
 import Header from "./Header";
 import LiveStats from "./LiveStats";
 import Question from "./Question";
 
 export default function Quiz() {
   const currentQuestionNumber = useStatsStore((s) => s.stats.currentQuestionNumber);
-  const [timeLimitSec, timerStatus, setTimer] = useTimerStore(
-    useShallow((s) => [s.timer.timeLimitSec, s.timer.timerStatus, s.setTimer]),
-  );
-
-  useEffect(() => {
-    setTimer({
-      timeLeftSec: timeLimitSec,
-      timerStatus: "running",
-      questionStartedAt: Date.now(),
-    });
-  }, [currentQuestionNumber, timeLimitSec, setTimer]);
-
-  useEffect(() => {
-    if (timerStatus !== "running") return;
-
-    const interval = setInterval(() => {
-      const { timeLeftSec } = useTimerStore.getState().timer;
-
-      if (timeLeftSec <= 1) {
-        setTimer({ timeLeftSec: 0, timerStatus: "ended" });
-        clearInterval(interval);
-        return;
-      }
-
-      setTimer({ timeLeftSec: timeLeftSec - 1 });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timerStatus, setTimer]);
+  useQuizTimer(currentQuestionNumber);
 
   return (
     <main className="min-h-screen w-full bg-surface text-ink">
