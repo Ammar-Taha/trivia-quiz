@@ -14,13 +14,16 @@ export type QuizSettings = {
 type SettingsStore = {
   quizSettings: QuizSettings;
   setQuizSettings: (updates: Partial<QuizSettings>) => void;
+  resetQuizSettings: () => void;
+};
+
+const initialQuizSettings: QuizSettings = {
+  category: "general_knowledge",
+  difficulty: "easy",
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
-  quizSettings: {
-    category: "general_knowledge",
-    difficulty: "medium",
-  },
+  quizSettings: initialQuizSettings,
   setQuizSettings: (updates) =>
     set((state) => ({
       quizSettings: {
@@ -28,4 +31,5 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
         ...updates,
       },
     })),
+  resetQuizSettings: () => set({ quizSettings: initialQuizSettings }),
 }));

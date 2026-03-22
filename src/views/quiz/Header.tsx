@@ -1,9 +1,11 @@
 import { Brain, Flame, LogOut } from "lucide-react";
 import useFormattedQuizSettings from "../../hooks/useFormattedQuizSettings";
+import useQuizSessionActions from "../../hooks/useQuizSessionActions";
 import { useStatsStore } from "../../store/stats-store";
 
 export default function Header() {
   const { category, difficulty } = useFormattedQuizSettings();
+  const resetQuiz = useQuizSessionActions();
   const streak = useStatsStore((s) => s.stats.streak);
 
   return (
@@ -29,6 +31,7 @@ export default function Header() {
         <button
           type="button"
           className="inline-flex h-9 items-center gap-1.5 border-2 border-danger-hover bg-ink px-2.5 text-xs font-semibold text-surface transition-colors duration-200 hover:bg-danger-hover"
+          onClick={resetQuiz}
         >
           <LogOut size={14} />
           Quit

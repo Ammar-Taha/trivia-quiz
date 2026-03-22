@@ -1,15 +1,16 @@
 import { useEffect } from "react";
 import { useStatsStore } from "../../store/stats-store";
 import { useTimerStore } from "../../store/timer-store";
+import { useShallow } from "zustand/react/shallow";
 import Header from "./Header";
 import LiveStats from "./LiveStats";
 import Question from "./Question";
 
 export default function Quiz() {
   const currentQuestionNumber = useStatsStore((s) => s.stats.currentQuestionNumber);
-  const timeLimitSec = useTimerStore((s) => s.timer.timeLimitSec);
-  const timerStatus = useTimerStore((s) => s.timer.timerStatus);
-  const setTimer = useTimerStore((s) => s.setTimer);
+  const [timeLimitSec, timerStatus, setTimer] = useTimerStore(
+    useShallow((s) => [s.timer.timeLimitSec, s.timer.timerStatus, s.setTimer]),
+  );
 
   useEffect(() => {
     setTimer({

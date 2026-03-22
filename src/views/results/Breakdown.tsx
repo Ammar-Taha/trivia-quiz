@@ -1,6 +1,9 @@
 import { RotateCcw } from "lucide-react";
+import useQuizSessionActions from "../../hooks/useQuizSessionActions";
 
 export default function Breakdown() {
+  const resetQuiz = useQuizSessionActions();
+
   return (
     <section className="px-3 py-4 text-ink">
       <div className="overflow-x-auto border border-accent">
@@ -78,6 +81,7 @@ export default function Breakdown() {
         <button
           type="button"
           className="inline-flex items-center gap-1.5 border-2 border-accent bg-ink px-4 py-2 text-sm font-semibold text-surface transition-colors duration-200 hover:bg-danger-hover"
+          onClick={resetQuiz}
         >
           <RotateCcw size={14} />
           Restart Quiz
