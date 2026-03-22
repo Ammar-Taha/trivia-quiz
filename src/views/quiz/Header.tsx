@@ -1,11 +1,11 @@
 import { Brain, Flame, LogOut } from "lucide-react";
 import useFormattedQuizSettings from "../../hooks/useFormattedQuizSettings";
-import useQuizSessionActions from "../../hooks/useQuizSessionActions";
+import useResetQuiz from "../../hooks/useResetQuiz";
 import { useStatsStore } from "../../store/stats-store";
 
 export default function Header() {
   const { category, difficulty } = useFormattedQuizSettings();
-  const resetQuiz = useQuizSessionActions();
+  const resetQuiz = useResetQuiz();
   const streak = useStatsStore((s) => s.stats.streak);
 
   return (

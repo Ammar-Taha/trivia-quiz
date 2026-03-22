@@ -1,11 +1,11 @@
+import { useShallow } from "zustand/react/shallow";
 import { useNavigationStore } from "../store/navigation-store";
 import { useQuestionsStore } from "../store/questions-store";
 import { useSettingsStore } from "../store/settings-store";
 import { useStatsStore } from "../store/stats-store";
 import { useTimerStore } from "../store/timer-store";
-import { useShallow } from "zustand/react/shallow";
 
-export default function useQuizSessionActions() {
+export default function useResetQuiz() {
   const setView = useNavigationStore((s) => s.setView);
   const [clearQuestions, setRequestStatus, setRequestError] = useQuestionsStore(
     useShallow((s) => [s.clearQuestions, s.setRequestStatus, s.setRequestError]),

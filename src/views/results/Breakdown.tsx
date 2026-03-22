@@ -1,8 +1,8 @@
 import { RotateCcw } from "lucide-react";
-import useQuizSessionActions from "../../hooks/useQuizSessionActions";
+import useResetQuiz from "../../hooks/useResetQuiz";
 
 export default function Breakdown() {
-  const resetQuiz = useQuizSessionActions();
+  const resetQuiz = useResetQuiz();
 
   return (
     <section className="px-3 py-4 text-ink">
