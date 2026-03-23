@@ -53,13 +53,72 @@ src/
 
 ## Scoring Model
 
-Each question score is composed of:
+The scoring logic is implemented in `results-store.ts` and is calculated per question.
 
-- **Correctness points**: fixed base points for a correct answer
-- **Speed bonus**: higher bonus when more time remains
-- **Streak bonus**: additional reward for sustained correct-answer streaks
+### Constants
 
-Incorrect answers produce zero score for that question.
+- `BASE_CORRECTNESS_POINTS = 100`
+- `MAX_SPEED_BONUS = 40`
+
+### Score Formula
+
+If the answer is incorrect:
+
+- `correctnessPoints = 0`
+- `speedBonus = 0`
+- `streakBonus = 0`
+- `total = 0`
+
+If the answer is correct:
+
+- `correctnessPoints = 100`
+- `speedRatio = clamp(timeLeftSec, 0, timeLimitSec) / max(1, timeLimitSec)`
+- `speedBonus = round(40 * speedRatio)`
+- `streakBonus` is determined by the **new streak after this answer**:
+  - streak >= 7 -> `30`
+  - streak >= 5 -> `20`
+  - streak >= 3 -> `10`
+  - otherwise -> `0`
+- `total = correctnessPoints + speedBonus + streakBonus`
+
+### Why this model
+
+- Correct answers always have strong base value (`100`)
+- Faster answers are rewarded, but capped (`max 40`)
+- Consistency is rewarded through streak tiers
+- Wrong answers reset streak and award no points, so accuracy still matters most
+
+### Worked Example (time limit: 120s)
+
+Assume a player answers 4 questions in this order:
+
+1. **Q1 correct**, `timeLeftSec = 90`, new streak = 1  
+   - speed bonus = `round(40 * (90/120)) = round(30) = 30`  
+   - streak bonus = `0`  
+   - total = `100 + 30 + 0 = 130`
+
+2. **Q2 correct**, `timeLeftSec = 45`, new streak = 2  
+   - speed bonus = `round(40 * (45/120)) = round(15) = 15`  
+   - streak bonus = `0`  
+   - total = `100 + 15 + 0 = 115`
+
+3. **Q3 correct**, `timeLeftSec = 20`, new streak = 3  
+   - speed bonus = `round(40 * (20/120)) = round(6.67) = 7`  
+   - streak bonus = `10` (streak reached 3)  
+   - total = `100 + 7 + 10 = 117`
+
+4. **Q4 wrong**, any time left, streak resets  
+   - total = `0`
+
+Final score across these 4 questions:
+
+- `130 + 115 + 117 + 0 = 362`
+
+### Notes
+
+- Timeout behaves like an unanswered/wrong submission -> `0` points
+- Speed bonus is bounded by time limit and never exceeds `40`
+- Streak bonus uses the post-answer streak value, so milestone questions trigger the bonus immediately
 
 ## API
 
