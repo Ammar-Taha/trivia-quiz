@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from "react";
 import { useNavigationStore } from "../../store/navigation-store";
 import { useQuestionsStore } from "../../store/questions-store";
 import {
@@ -23,13 +24,16 @@ export default function Question() {
       s.setStats,
     ]),
   );
-  const [timeLeftSec, timeLimitSec, questionStartedAt] = useTimerStore(
-    useShallow((s) => [
-      s.timer.timeLeftSec,
-      s.timer.timeLimitSec,
-      s.timer.questionStartedAt,
-    ]),
-  );
+  const [timeLeftSec, timeLimitSec, questionStartedAt, timerStatus, setTimer] =
+    useTimerStore(
+      useShallow((s) => [
+        s.timer.timeLeftSec,
+        s.timer.timeLimitSec,
+        s.timer.questionStartedAt,
+        s.timer.timerStatus,
+        s.setTimer,
+      ]),
+    );
 
   const totalQuestions = questions.length;
   const currentQuestionIndex = Math.max(0, currentQuestionNumber - 1);
@@ -39,54 +43,86 @@ export default function Question() {
     ? [currentQuestion.correctAnswer, ...currentQuestion.incorrectAnswers]
     : [];
 
-  function handleSubmitAnswer() {
-    if (!currentQuestion || !selectedAnswer) return;
+  const finalizeCurrentQuestion = useCallback(
+    (answer: string | null, timedOut = false) => {
+      if (!currentQuestion) return;
 
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-    const nextStreak = isCorrect ? streak + 1 : 0;
-    const scoreBreakdown = calculateQuestionScore({
-      isCorrect,
+      // Stop current question timer immediately to avoid duplicate submits.
+      setTimer({ timerStatus: "paused", questionStartedAt: null });
+
+      const effectiveAnswer = answer ?? "No answer";
+      const isCorrect = answer !== null && answer === currentQuestion.correctAnswer;
+      const nextStreak = isCorrect ? streak + 1 : 0;
+      const scoreBreakdown = calculateQuestionScore({
+        isCorrect,
+        timeLeftSec,
+        timeLimitSec,
+        currentStreak: nextStreak,
+      });
+
+      const timeoutTimeTaken = timeLimitSec;
+      const fallbackTimeTaken = Math.max(0, timeLimitSec - timeLeftSec);
+      const measuredTimeTaken =
+        questionStartedAt !== null
+          ? Math.round((Date.now() - questionStartedAt) / 1000)
+          : fallbackTimeTaken;
+      const timeTakenSec = timedOut
+        ? timeoutTimeTaken
+        : Math.min(timeLimitSec, Math.max(0, measuredTimeTaken));
+
+      appendAttempt({
+        questionId: currentQuestion.id,
+        questionText: currentQuestion.question,
+        userAnswer: effectiveAnswer,
+        correctAnswer: currentQuestion.correctAnswer,
+        timeTakenSec,
+        isCorrect,
+        score: scoreBreakdown,
+      });
+
+      const nextQuestionNumber = currentQuestionNumber + 1;
+      const isQuizFinished = nextQuestionNumber > totalQuestions;
+
+      setStats({
+        score: score + scoreBreakdown.total,
+        correct: isCorrect ? correct + 1 : correct,
+        wrong: isCorrect ? wrong : wrong + 1,
+        streak: nextStreak,
+        currentQuestionNumber: nextQuestionNumber,
+        selectedAnswer: null,
+      });
+
+      if (isQuizFinished) {
+        setView("results");
+      }
+    },
+    [
+      appendAttempt,
+      correct,
+      currentQuestion,
+      currentQuestionNumber,
+      questionStartedAt,
+      score,
+      setStats,
+      setTimer,
+      setView,
+      streak,
       timeLeftSec,
       timeLimitSec,
-      currentStreak: nextStreak,
-    });
+      totalQuestions,
+      wrong,
+    ],
+  );
 
-    const fallbackTimeTaken = Math.max(0, timeLimitSec - timeLeftSec);
-    const measuredTimeTaken =
-      questionStartedAt !== null
-        ? Math.round((Date.now() - questionStartedAt) / 1000)
-        : fallbackTimeTaken;
-    const timeTakenSec = Math.min(
-      timeLimitSec,
-      Math.max(0, measuredTimeTaken),
-    );
-
-    appendAttempt({
-      questionId: currentQuestion.id,
-      questionText: currentQuestion.question,
-      userAnswer: selectedAnswer,
-      correctAnswer: currentQuestion.correctAnswer,
-      timeTakenSec,
-      isCorrect,
-      score: scoreBreakdown,
-    });
-
-    const nextQuestionNumber = currentQuestionNumber + 1;
-    const isQuizFinished = nextQuestionNumber > totalQuestions;
-
-    setStats({
-      score: score + scoreBreakdown.total,
-      correct: isCorrect ? correct + 1 : correct,
-      wrong: isCorrect ? wrong : wrong + 1,
-      streak: nextStreak,
-      currentQuestionNumber: nextQuestionNumber,
-      selectedAnswer: null,
-    });
-
-    if (isQuizFinished) {
-      setView("results");
-    }
+  function handleSubmitAnswer() {
+    if (!selectedAnswer) return;
+    finalizeCurrentQuestion(selectedAnswer);
   }
+
+  useEffect(() => {
+    if (timerStatus !== "ended") return;
+    finalizeCurrentQuestion(selectedAnswer, true);
+  }, [finalizeCurrentQuestion, selectedAnswer, timerStatus]);
 
   return (
     <section className="flex flex-1 flex-col border-b-2 border-accent p-3 text-ink lg:border-b-0 lg:border-r-2">
