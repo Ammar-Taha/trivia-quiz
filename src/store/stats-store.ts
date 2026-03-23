@@ -6,6 +6,7 @@ type Stats = {
   wrong: number;
   streak: number;
   currentQuestionNumber: number;
+  selectedAnswer: string | null;
 };
 
 type StatsStore = {
@@ -20,6 +21,7 @@ const initialStats: Stats = {
   wrong: 0,
   streak: 0,
   currentQuestionNumber: 1,
+  selectedAnswer: null,
 };
 
 export const useStatsStore = create<StatsStore>((set) => ({
