@@ -27,6 +27,8 @@ export default function MainPane() {
       const response = await fetch(`${BASE_URL}?${QUERY_PARAMS}`);
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
       const data = await response.json();
+      // Logging API response for testing
+      console.log(data);
       setQuestions(data);
       setRequestStatus("success");
       setView("quiz");

@@ -1,8 +1,10 @@
 import { RotateCcw } from "lucide-react";
 import useResetQuiz from "../../hooks/useResetQuiz";
+import { useResultsStore } from "../../store/results-store";
 
 export default function Breakdown() {
   const resetQuiz = useResetQuiz();
+  const attempts = useResultsStore((s) => s.attempts);
 
   return (
     <section className="px-3 py-4 text-ink">
@@ -31,48 +33,33 @@ export default function Breakdown() {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-surface">
-              <td className="border-b border-accent px-2 py-2">1</td>
-              <td className="border-b border-accent px-2 py-2">
-                What is the symbol for gold?
-              </td>
-              <td className="border-b border-accent px-2 py-2">Au</td>
-              <td className="border-b border-accent px-2 py-2">Au</td>
-              <td className="border-b border-accent px-2 py-2">8s</td>
-              <td className="border-b border-accent px-2 py-2">✓</td>
-            </tr>
-            <tr className="bg-surface">
-              <td className="border-b border-accent px-2 py-2">2</td>
-              <td className="border-b border-accent px-2 py-2">
-                What planet is closest to the Sun?
-              </td>
-              <td className="border-b border-accent px-2 py-2">Mercury</td>
-              <td className="border-b border-accent px-2 py-2">Mercury</td>
-              <td className="border-b border-accent px-2 py-2">10s</td>
-              <td className="border-b border-accent px-2 py-2">✓</td>
-            </tr>
-            <tr className="bg-surface">
-              <td className="border-b border-accent px-2 py-2">3</td>
-              <td className="border-b border-accent px-2 py-2">
-                Who invented the telephone?
-              </td>
-              <td className="border-b border-accent px-2 py-2">
-                Thomas Edison
-              </td>
-              <td className="border-b border-accent px-2 py-2">
-                A.C. Bell
-              </td>
-              <td className="border-b border-accent px-2 py-2">22s</td>
-              <td className="border-b border-accent px-2 py-2">✗</td>
-            </tr>
-            <tr className="bg-surface">
-              <td className="px-2 py-2">4</td>
-              <td className="px-2 py-2">What is H2O commonly known as?</td>
-              <td className="px-2 py-2">Water</td>
-              <td className="px-2 py-2">Water</td>
-              <td className="px-2 py-2">7s</td>
-              <td className="px-2 py-2">✓</td>
-            </tr>
+            {attempts.length === 0 ? (
+              <tr className="bg-surface">
+                <td className="px-2 py-3 text-center text-muted" colSpan={6}>
+                  No attempts recorded yet.
+                </td>
+              </tr>
+            ) : (
+              attempts.map((attempt, index) => {
+                const isLast = index === attempts.length - 1;
+                const cellClass = isLast
+                  ? "px-2 py-2"
+                  : "border-b border-accent px-2 py-2";
+
+                return (
+                  <tr key={`${attempt.questionId}-${index}`} className="bg-surface">
+                    <td className={cellClass}>{index + 1}</td>
+                    <td className={cellClass}>{attempt.questionText}</td>
+                    <td className={cellClass}>{attempt.userAnswer}</td>
+                    <td className={cellClass}>{attempt.correctAnswer}</td>
+                    <td className={cellClass}>{attempt.timeTakenSec}s</td>
+                    <td className={`${cellClass} font-semibold`}>
+                      {attempt.isCorrect ? "✓" : "✗"}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
