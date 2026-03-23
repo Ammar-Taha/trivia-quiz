@@ -1,100 +1,119 @@
 # Trivia Quiz App
 
-A React + TypeScript trivia quiz application with a blue-themed UI and multi-screen flow (`Start`, `Quiz`, `Results`).
+A focused, single-page trivia experience built with React, TypeScript, Tailwind CSS, and Zustand.
 
-## Scoring Model (Proposed)
+The app lets users pick quiz settings, run a timed question flow, and review a detailed results report with score breakdowns and performance metrics.
 
-This project uses a **richer scoring system** than simple correct-answer counting.
-Each question can reward:
+## Features
 
-- correctness
-- speed
-- streak consistency
+- Start view with category and difficulty selection
+- Question flow with one-question-at-a-time interaction
+- Per-question timer with auto-submit behavior on timeout
+- Live quiz stats (score, correct/wrong, streak, progress)
+- Results summary with final metrics and detailed attempt table
+- Shared reset flow for both **Quit** and **Restart Quiz**
 
-### Formula
+## Tech Stack
 
-For each question:
+- React + TypeScript + Vite
+- Tailwind CSS v4
+- Zustand for global state
+- Lucide React icons
+- The Trivia API for question data
 
-```text
-questionScore = correctnessPoints + speedBonus + streakBonus
-```
-
-For the whole quiz:
-
-```text
-finalScore = sum(questionScore for all questions)
-```
-
----
-
-## Scoring Components
-
-### 1) Correctness Points (Base)
-
-- Correct answer: `+100`
-- Wrong answer: `0` (optional variant: small penalty such as `-20`)
-
-### 2) Speed Bonus
-
-Speed bonus only applies on correct answers.
+## Project Structure
 
 ```text
-speedRatio = timeLeft / timeLimit
-speedBonus = round(40 * speedRatio)
+src/
+  hooks/
+    useQuizTimer.ts
+    useResetQuiz.ts
+  store/
+    navigation-store.ts
+    settings-store.ts
+    questions-store.ts
+    stats-store.ts
+    timer-store.ts
+    results-store.ts
+  views/
+    start/
+    quiz/
+    results/
+  App.tsx
 ```
 
-- If user answers very fast, they can get up to `+40`.
-- If user answers at the last moment, bonus approaches `0`.
+## State Architecture (Zustand)
 
-### 3) Streak Bonus
+- `navigation-store`: current app view (`start | quiz | results`)
+- `settings-store`: selected category and difficulty
+- `questions-store`: fetched question list + request status/error
+- `stats-store`: live quiz counters (score, streak, correct/wrong, selected answer, current question index)
+- `timer-store`: timing state (`timeLimitSec`, `timeLeftSec`, `timerStatus`, `questionStartedAt`)
+- `results-store`: per-question attempts and scoring breakdown
 
-Streak bonus also applies only on correct answers.
+## Scoring Model
 
-- streak `1-2`: `+0`
-- streak `3-4`: `+10`
-- streak `5-6`: `+20`
-- streak `7+`: `+30`
+Each question score is composed of:
 
----
+- **Correctness points**: fixed base points for a correct answer
+- **Speed bonus**: higher bonus when more time remains
+- **Streak bonus**: additional reward for sustained correct-answer streaks
 
-## Worked Example
+Incorrect answers produce zero score for that question.
 
-Question result:
+## API
 
-- Correct answer
-- Time left: `12s` out of `20s`
-- Current streak: `4`
+Question requests are fetched from [The Trivia API](https://the-trivia-api.com/docs/), using selected settings:
 
-Calculation:
+- `limit`
+- `categories`
+- `difficulty`
 
-```text
-Base = 100
-Speed ratio = 12 / 20 = 0.6
-Speed bonus = round(40 * 0.6) = 24
-Streak bonus = 10
-Question score = 100 + 24 + 10 = 134
+## Local Development
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+
+### Install
+
+```bash
+pnpm install
 ```
 
----
+### Run Dev Server
 
-## Why This Model
+```bash
+pnpm dev
+```
 
-- **Fair:** correctness remains the primary driver.
-- **Engaging:** rewards quick thinking and consistency.
-- **Scalable:** easy to rebalance by changing weights (`100`, `40`, streak tiers).
-- **Readable:** users can understand why their score changed.
+### Lint
 
----
+```bash
+pnpm lint
+```
 
-## Results Metrics Recommendation
+### Build
 
-For this scoring system, these stats are recommended in the report:
+```bash
+pnpm build
+```
 
-- `Final Score` (important when bonuses are included)
-- `Accuracy`
-- `Correct`
-- `Wrong` (or `Incorrect`)
-- `Avg Time`
-- `Best Streak`
+## Current Status
 
-If scoring is simplified later to just `correct count`, `Final Score` may become redundant and can be removed.
+Implemented:
+
+- Start screen UI and settings flow
+- Quiz question/timer/submit flow
+- Dynamic live stats
+- Results summary and detailed breakdown
+- Global reset behavior across quiz and results screens
+
+Planned/optional improvements:
+
+- Persisting best score/history
+- Shuffle options and stronger answer randomization controls
+- Better loading/empty states and network retry UX
+- Additional accessibility refinements
+
